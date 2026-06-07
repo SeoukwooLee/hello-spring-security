@@ -19,6 +19,7 @@
     </style>
 </head>
 <body>
+<div th:replace="~{fragments/info :: header}"></div>
 
 <nav class="navbar navbar-expand-lg navbar-dark mb-4">
     <div class="container">
@@ -105,6 +106,8 @@
         </div>
     </div>
 </div>
+
+<footer th:replace="~{fragments/info :: footer}"></footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
