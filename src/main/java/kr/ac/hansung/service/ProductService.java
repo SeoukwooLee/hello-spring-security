@@ -47,6 +47,21 @@ public class ProductService {
         return productRepository.save(product);
     }
 
+    // ROLE_ADMIN 전용 상품 수정 — 더티 체킹(Dirty Checking)으로 save() 없이 UPDATE
+    @Transactional
+    public Product updateProduct(Long id, ProductDto dto) {
+        Product product = productRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다: " + id));
+
+        product.setName(dto.getName());
+        product.setPrice(dto.getPrice());
+        product.setStock(dto.getStock());
+        if (dto.getDescription() != null) {
+            product.setDescription(dto.getDescription());
+        }
+        return product; // @Transactional 종료 시 더티 체킹으로 자동 UPDATE
+    }
+
     @Transactional
     public void deleteById(Long id) {
         productRepository.deleteById(id);

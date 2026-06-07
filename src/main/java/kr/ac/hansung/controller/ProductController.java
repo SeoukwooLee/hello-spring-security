@@ -1,5 +1,6 @@
 package kr.ac.hansung.controller;
 
+import jakarta.validation.Valid;
 import kr.ac.hansung.dto.ProductDto;
 import kr.ac.hansung.entity.Product;
 import kr.ac.hansung.service.ProductService;
@@ -9,7 +10,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/products")
@@ -18,7 +21,6 @@ public class ProductController {
 
     private final ProductService productService;
 
-    // 상품 목록 — 페이지(Pageable) + 키워드 검색 분기
     @GetMapping
     public String list(@RequestParam(required = false) String keyword,
                        @RequestParam(defaultValue = "0") int page,
@@ -26,8 +28,6 @@ public class ProductController {
                        Model model) {
 
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by("id"));
-
-        // 빈 문자열은 null 로 정규화 → Thymeleaf URL 에 keyword 파라미터 미포함
         String normalizedKeyword = (keyword != null && !keyword.isBlank()) ? keyword : null;
 
         Page<Product> productPage = (normalizedKeyword != null)
@@ -54,6 +54,37 @@ public class ProductController {
     @PostMapping
     public String save(@ModelAttribute ProductDto dto) {
         productService.save(dto);
+        return "redirect:/products";
+    }
+
+    // 상품 수정 폼 (ROLE_ADMIN 전용)
+    @GetMapping("/{id}/edit")
+    public String editForm(@PathVariable Long id, Model model) {
+        Product product = productService.findById(id);
+
+        ProductDto dto = new ProductDto();
+        dto.setName(product.getName());
+        dto.setPrice(product.getPrice());
+        dto.setStock(product.getStock());
+        dto.setDescription(product.getDescription());
+
+        model.addAttribute("productDto", dto);
+        model.addAttribute("productId", id);
+        return "products/edit";
+    }
+
+    @PostMapping("/{id}/edit")
+    public String edit(@PathVariable Long id,
+                       @Valid @ModelAttribute("productDto") ProductDto productDto,
+                       BindingResult bindingResult,
+                       Model model,
+                       RedirectAttributes ra) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("productId", id);
+            return "products/edit";
+        }
+        productService.updateProduct(id, productDto);
+        ra.addFlashAttribute("successMessage", "상품이 수정되었습니다.");
         return "redirect:/products";
     }
 
