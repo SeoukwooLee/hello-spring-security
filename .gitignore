@@ -24,3 +24,19 @@ Thumbs.db
 # ── 로그 ─────────────────────────────────────────
 *.log
 logs/
+
+# ── 보고서/문서 ───────────────────────────────────
+*.docx
+*.pdf
+*.pptx
+*.svg
+~$*
+
+# ── 작업 폴더 ─────────────────────────────────────
+.claude/
+screenshots/
+patches/
+auto_commit/
+auto_commit2/
+*.bundle
+mysql-data/
